@@ -1,3 +1,4 @@
+from turtle import distance
 import numpy as np
 
 
@@ -58,7 +59,15 @@ class KNNClassifier:
         """
         YOUR CODE IS HERE
         """
-        pass
+        num_test = X.shape[0]
+        num_train = self.train_X.shape[0]
+        distances = np.zeros((num_test, num_train))
+
+        for i in range(num_test):
+            for j in range(num_train):
+               distances[i, j] = np.sum(np.abs(X[i] - self.train_X[j]))
+
+        return distances
 
 
     def compute_distances_one_loop(self, X):
@@ -77,7 +86,14 @@ class KNNClassifier:
         """
         YOUR CODE IS HERE
         """
-        pass
+        num_test = X.shape[0]
+        num_train = self.train_X.shape[0]
+        distances = np.zeros((num_test, num_train))
+
+        for i in range(num_test):
+            distances[i] = np.sum(np.abs(X[i] - self.train_X), axis=1)
+
+        return distances
 
 
     def compute_distances_no_loops(self, X):
@@ -92,52 +108,50 @@ class KNNClassifier:
         distances, np array (num_test_samples, num_train_samples) - array
            with distances between each test and each train sample
         """
-
-        """
-        YOUR CODE IS HERE
-        """
-        pass
+        test_sum = np.sum(np.abs(X[:, np.newaxis, :] - self.train_X), axis=2)
+        
+        return test_sum
 
 
-    def predict_labels_binary(self, distances):
+    def predict_labels_binary(self, dists):
         """
         Returns model predictions for binary classification case
         
         Arguments:
-        distances, np array (num_test_samples, num_train_samples) - array
+        dists, np array (num_test_samples, num_train_samples) - array
            with distances between each test and each train sample
         Returns:
-        pred, np array of bool (num_test_samples) - binary predictions 
+        prediction, np array of bool (num_test_samples) - binary predictions 
            for every test sample
         """
-
-        n_train = distances.shape[1]
-        n_test = distances.shape[0]
+        n_test = dists.shape[0]
         prediction = np.zeros(n_test)
 
-        """
-        YOUR CODE IS HERE
-        """
-        pass
+        for i in range(n_test):
+            nearest_y = self.train_y[np.argsort(dists[i])[:self.k]]
+            prediction[i] = np.argmax(np.bincount(nearest_y))
+            
+        return prediction
 
 
-    def predict_labels_multiclass(self, distances):
+    def predict_labels_multiclass(self, dists):
         """
         Returns model predictions for multi-class classification case
         
         Arguments:
-        distances, np array (num_test_samples, num_train_samples) - array
+        dists, np array (num_test_samples, num_train_samples) - array
            with distances between each test and each train sample
         Returns:
         pred, np array of int (num_test_samples) - predicted class index 
            for every test sample
         """
 
-        n_train = distances.shape[0]
-        n_test = distances.shape[0]
-        prediction = np.zeros(n_test, np.int)
+        n_train = dists.shape[0]
+        n_test = dists.shape[0]
+        prediction = np.zeros(n_test, int)
 
-        """
-        YOUR CODE IS HERE
-        """
-        pass
+        for i in range(n_test):
+            nearest_y = self.train_y[np.argsort(dists[i])[:self.k]]
+            prediction[i] = np.argmax(np.bincount(nearest_y))
+            
+        return prediction
